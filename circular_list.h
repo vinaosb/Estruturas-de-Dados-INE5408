@@ -23,8 +23,8 @@ class CircularList {
     }
     //! limpar lista
     void clear() {
-        for (auto i = 0u; i < size(); i++)
-            pop_back();
+        for (auto i = 0u; !empty(); i++)
+            pop_front();
         head = nullptr;
         size_ = 0;
     }
@@ -58,14 +58,23 @@ class CircularList {
     //! inserir em ordem
     void insert_sorted(const T& data) {
 		if (empty()) return push_front(data);
+		if (size() == 1) {
+		    if (head->data() >= data) return push_front(data);
+		    else
+		        return push_back(data);
+		}
+		if(head->data() >= data)
+		    return push_front(data);
+		if(end()->data() <= data)
+		    return push_back(data);
+		auto current = head;
 		auto i = 0u;
-		while (indexNode(i)) {
-			if (indexNode(i)->data() > data) break;
-			if(i == size()) break;
-			++i;
+		while (current != end()) {
+		    current = current->next();
+		    i++;
+		    if (current->data() >= data) break;
 		}
 		insert(data, i);
-        ++size_;
     }
     //! acessar um elemento na posição index
     T& at(std::size_t index) {
@@ -75,13 +84,12 @@ class CircularList {
     }
     //! retirar da posição
     T pop(std::size_t index) {
-		++index;
 		if (empty()) throw (std::out_of_range("_"));
-		if (index < 0 || index > size()) throw(std::out_of_range("_"));
+		if (index < 0 || index >= size()) throw(std::out_of_range("_"));
 		if (index == 0) return pop_front();
-		if (index == size()) return pop_back();
-		auto current = indexNode(index-1);
-		auto old = indexNode(index-2);
+		if (index == size()-1) return pop_back();
+		auto current = indexNode(index);
+		auto old = indexNode(index-1);
 		T retorno = current->data();
 		old->next(current->next());
 		delete current;
@@ -90,24 +98,29 @@ class CircularList {
     }
     //! retirar do fim
     T pop_back() {
-		if (empty()) return pop_front();
+		if (empty()) throw (std::out_of_range("_"));
 		if (size() == 1) return pop_front();
-		T retorno = end() -> data();
-		auto before = indexNode(size()-1);
-		before -> next(head);
+		auto current = end();
+		T retorno = current->data();
+		auto old = indexNode(size()-2);
+		old -> next(head);
+		delete current;
 		--size_;
         return retorno;
     }
     //! retirar do início
     T pop_front() {
 		if (empty()) throw (std::out_of_range("_"));
-		auto retorno = head -> data();
-		auto temp2 = head;
-		head = head->next();
-        --size_;
-		if (!empty())
-		    end()->next(head);
-		delete temp2;
+		auto current = head;
+		T retorno = current->data();
+		if(size() == 1) {
+		    head = nullptr;
+		} else {
+    		end()->next(head->next());
+    		head = head->next();
+		}
+		delete current;
+		--size_;
         return retorno;
     }
     //! remover específico
