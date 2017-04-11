@@ -103,7 +103,7 @@ class DoublyCircularList {
 		T retorno = current->data();
 		current->prev()->next(current->next());
 		current->next()->prev(current->prev());
-		current = nullptr;
+		delete current;
 		--size_;
         return retorno;
     }
@@ -116,6 +116,7 @@ class DoublyCircularList {
 		auto temp = current->prev();
 		temp->next(head);
 		head->prev(temp);
+		delete current;
 		--size_;
         return retorno;
     }
@@ -131,6 +132,7 @@ class DoublyCircularList {
     		current->next()->prev(current->prev());
     		head = current->next();
 		}
+		delete current;
 		--size_;
         return retorno;
     }
