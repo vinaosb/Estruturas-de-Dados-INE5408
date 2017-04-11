@@ -19,6 +19,8 @@ class LinkedStack {
         top_ = nullptr;
     }
     ~LinkedStack() {   // destrutor
+        clear();
+        size_ = 0u;
     }
     //! limpar lista
     void clear() {
@@ -29,16 +31,19 @@ class LinkedStack {
     }
     //! inserir no início
     void push(const T& data) {
-        top_ = new Node(data, top_);
+        Node* temp = new Node(data, top_);
+        top_ = temp;
         size_++;
     }
     //! retirar do início
     T pop() {
 		if (empty()) throw (std::out_of_range("_"));
-		auto temp = top_ -> data();
+		auto temp2 = top_ -> data();
+		auto temp = top_;
 		top_ = top_->next();
+		delete temp;
         --size_;
-        return temp;
+        return temp2;
     }
     //! acessar um elemento no topo
     T& top() const {
