@@ -19,7 +19,7 @@ class CircularList {
     }
     ~CircularList() {  // destrutor
         clear();
-        delete[] head;
+        delete head;
     }
     //! limpar lista
     void clear() {
@@ -31,7 +31,7 @@ class CircularList {
     //! inserir no fim
     void push_back(const T& data) {
 		if (empty()) {
-			head = new Node(data, head);
+			return push_front(data);
 		} else {
 			end()->next(new Node(data, head));
 		}
@@ -84,13 +84,14 @@ class CircularList {
 		auto old = indexNode(index-2);
 		T retorno = current->data();
 		old->next(current->next());
-		current = nullptr;
+		delete current;
 		--size_;
         return retorno;
     }
     //! retirar do fim
     T pop_back() {
-		if (size() == 0) return pop_front();
+		if (empty()) return pop_front();
+		if (size() == 1) return pop_front();
 		T retorno = end() -> data();
 		auto before = indexNode(size()-1);
 		before -> next(head);
@@ -100,11 +101,14 @@ class CircularList {
     //! retirar do início
     T pop_front() {
 		if (empty()) throw (std::out_of_range("_"));
-		auto temp = head -> data();
+		auto retorno = head -> data();
+		auto temp2 = head;
 		head = head->next();
-		end()->next(head);
         --size_;
-        return temp;
+		if (!empty())
+		    end()->next(head);
+		delete temp2;
+        return retorno;
     }
     //! remover específico
     void remove(const T& data) {
