@@ -26,7 +26,7 @@ class LinkedQueue {
     }
     //! limpar lista
     void clear() {
-        for (auto i = 0u; i < size(); i++)
+        for (auto i = 0u; !empty(); i++)
             dequeue();
         head = nullptr;
         tail = nullptr;
