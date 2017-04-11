@@ -46,8 +46,10 @@ class LinkedQueue {
     //! desenfileirar
     T dequeue() {
 		if (empty()) throw (std::out_of_range("_"));
-		auto temp = head -> data();
-		head = head->next();
+		auto temp = head->data();
+		auto temp2 = head;
+		head = temp2 -> next();
+		delete temp2;
         --size_;
         return temp;
     }
