@@ -23,7 +23,7 @@ class DoublyLinkedList {
     }
     //! limpar lista
     void clear() {
-        for (auto i = 0u; i < size(); i++)
+        for (auto i = 0u; !empty(); i++)
             pop_back();
         head = nullptr;
         size_ = 0;
@@ -47,32 +47,43 @@ class DoublyLinkedList {
     }
     //! inserir na posição
     void insert(const T& data, std::size_t index) {
-		if (index < 0 || index > size()) throw(std::out_of_range("_"));
+		if (index < 0 || index >= size()) throw(std::out_of_range("_"));
 		if (index == 0) return push_front(data);
-		if (index == size()) return push_back(data);
+		if (index == size()-1) return push_back(data);
 		auto temp = indexNode(index);
-		temp->prev()->next(new Node(data, temp->prev(), temp));
+		auto novo = new Node(data, temp->prev(), temp);
+		temp->prev(novo);
+		novo->prev()->next(novo);
         ++size_;
     }
     //! inserir em ordem
     void insert_sorted(const T& data) {
 		if (empty()) return push_front(data);
-		auto i = 0u;
-		while (indexNode(i)) {
-			if (indexNode(i)->data() >= data) break;
-			++i;
+		if (size() == 1) {
+		    if (head->data() >= data) return push_front(data);
+		    else
+		        return push_back(data);
 		}
-		if (!i) return push_front(data);
-		if (i == size()) return push_back(data);
-		return insert(data, i);
+		if(end()->data() <= data)
+		    return push_back(data);
+		if(head->data() >= data)
+		    return push_front(data);
+		auto current = head;
+		auto i = 0u;
+		while (current != end()) {
+		    current = current->next();
+		    i++;
+		    if (current->data() >= data) break;
+		}
+		insert(data, i);
     }
     //! retirar da posição
     T pop(std::size_t index) {
 		++index;
 		if (empty()) throw (std::out_of_range("_"));
-		if (index < 0 || index > size()) throw(std::out_of_range("_"));
+		if (index < 0 || index >= size()) throw(std::out_of_range("_"));
 		if (index == 0) return pop_front();
-		if (index >= size()-1) return pop_back();
+		if (index == size()-1) return pop_back();
 		auto current = indexNode(index-1);
 		T retorno = current->data();
 		current->prev()->next(current->next());
@@ -84,12 +95,11 @@ class DoublyLinkedList {
     //! retirar do fim
     T pop_back() {
 		if (empty()) throw (std::out_of_range("_"));
-		auto current = head;
-		while (current->next())
-			current = current->next();
-		auto retorno = current->data();
-		if (current->prev())
-		    current->prev()->next(nullptr);
+		if (size() == 1) return pop_front();
+		auto current = end();
+		T retorno = current->data();
+		auto temp = current->prev();
+		temp->next(nullptr);
 		delete current;
 		--size_;
         return retorno;
@@ -97,14 +107,17 @@ class DoublyLinkedList {
     //! retirar do início
     T pop_front() {
 		if (empty()) throw (std::out_of_range("_"));
-		auto temp = head -> data();
 		auto current = head;
-		if(head->next())
-		    head->next()->prev(nullptr);
-		head = head->next();
+		T retorno = current->data();
+		if(size() == 1) {
+		    head = nullptr;
+		} else {
+    		head->next()->prev(nullptr);
+    		head = current->next();
+		}
 		delete current;
-        --size_;
-        return temp;
+		--size_;
+        return retorno;
     }
     //! remover específico
     void remove(const T& data) {
