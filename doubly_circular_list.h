@@ -19,12 +19,12 @@ class DoublyCircularList {
     }
     ~DoublyCircularList() {  // destrutor
         clear();
-        delete[] head;
+        delete head;
     }
     //! limpar lista
     void clear() {
-        for (auto i = 0u; i < size(); i++)
-            pop_back();
+        for (auto i = 0u; !empty(); i++)
+            pop_front();
         head = nullptr;
         size_ = 0;
     }
@@ -55,7 +55,7 @@ class DoublyCircularList {
         } else {
             temp->next(head);
             temp->prev(end());
-            head->prev(temp);
+            end()->next(temp);
             head = temp;
         }
         size_++;
@@ -94,12 +94,11 @@ class DoublyCircularList {
     }
     //! retirar da posição
     T pop(std::size_t index) {
-		++index;
 		if (empty()) throw (std::out_of_range("_"));
-		if (index < 0 || index > size()) throw(std::out_of_range("_"));
+		if (index < 0 || index >= size()) throw(std::out_of_range("_"));
 		if (index == 0) return pop_front();
-		if (index == size()) return pop_back();
-		auto current = indexNode(index-1);
+		if (index == size()-1) return pop_back();
+		auto current = indexNode(index);
 		T retorno = current->data();
 		current->prev()->next(current->next());
 		current->next()->prev(current->prev());
@@ -127,10 +126,10 @@ class DoublyCircularList {
 		T retorno = current->data();
 		if(size() == 1) {
 		    head = nullptr;
-		} else if (head->next()) {
-    		current->prev()->next(current->next());
-    		current->next()->prev(current->prev());
-    		head = current->next();
+		} else {
+    		end()->next(head->next());
+    		head->next()->prev(end());
+    		head = head->next();
 		}
 		delete current;
 		--size_;
