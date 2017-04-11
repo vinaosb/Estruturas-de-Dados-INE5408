@@ -24,7 +24,7 @@ class LinkedStack {
     }
     //! limpar lista
     void clear() {
-        for (auto i = 0u; i < size(); i++)
+        for (auto i = 0u; !empty(); i++)
             pop();
         top_ = nullptr;
         size_ = 0;
