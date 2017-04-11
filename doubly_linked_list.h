@@ -31,7 +31,7 @@ class DoublyLinkedList {
     //! inserir no fim
     void push_back(const T& data) {
 		if (empty()) {
-			head = new Node(data);
+			return push_front(data);
 		} else {
 		    auto temp = end();
 			temp->next(new Node(data, temp, nullptr));
@@ -77,7 +77,7 @@ class DoublyLinkedList {
 		T retorno = current->data();
 		current->prev()->next(current->next());
 		current->next()->prev(current->prev());
-		current = nullptr;
+		delete current;
 		--size_;
         return retorno;
     }
@@ -90,7 +90,7 @@ class DoublyLinkedList {
 		auto retorno = current->data();
 		if (current->prev())
 		    current->prev()->next(nullptr);
-		current = nullptr;
+		delete current;
 		--size_;
         return retorno;
     }
@@ -98,9 +98,11 @@ class DoublyLinkedList {
     T pop_front() {
 		if (empty()) throw (std::out_of_range("_"));
 		auto temp = head -> data();
+		auto current = head;
 		if(head->next())
 		    head->next()->prev(nullptr);
 		head = head->next();
+		delete current;
         --size_;
         return temp;
     }
