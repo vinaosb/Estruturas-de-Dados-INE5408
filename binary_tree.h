@@ -8,83 +8,86 @@
 
 namespace structures {
 
-template<typename X>
+template<typename T>
 
 //! Arvore Binaria
 class BinaryTree {
  public:
     //! Construtor
     BinaryTree() {
-        root = nullptr;
+        root_ = nullptr;
         size_ = 0;
     }
     //! Destrutor
     ~BinaryTree() {
-        destroy(root);
+        destroy(root_);
         size_ = 0;
-        root = nullptr;
+        root_ = nullptr;
     }
 
     //! Insersor
-    void insert(const X& data) {
-        insert(data, root);
+    void insert(T data) {
+        inserter(data, root_);
         size_++;
     }
     //! Remoção
-    void remove(const X& data) {
-        removes(data, root);
-        size_--;
+    void remove(T data) {
+        if (contains(data)) {
+            removes(data, root_);
+            size_--;
+        }
     }
 
     //! Contem
-    bool contains(const X& data) const {
-        return contains(root, data);
+    bool contains(T data) {
+        return contain_(data, root_);
     }
     //! Vazio
     bool empty() const {
         return !size();
     }
 
-    //! Xamanho
+    //! Tamanho
     std::size_t size() const {
         return size_;
     }
     //! Ordenacao
-    /*ArrayList<X> pre_order() const {
+    ArrayList<T> pre_order() const {
             return new ArrayList();
         }
     //! Ordenacao
-    ArrayList<X> in_order() const {
+    ArrayList<T> in_order() const {
             return new ArrayList();
         }
     //! Ordenacao
-    ArrayList<X> post_order() const {
+    ArrayList<T> post_order() const {
             return new ArrayList();
-        }*/
+        }
 
  private:
     struct Node {
          public:
-        explicit Node(X& data_):
-            data{data_}
+        explicit Node(T& data):
+            data_{data}
         {}
 
 
-        void insert(const X& data_) {
-            data = data_;
+        void data(T& data) {
+            data_ = data;
         }
 
-        bool remove(const X& data_) {
-            if (contains(data_)) {
-                delete *data;
+        bool remover(T& data) {
+            if (contain(data)) {
+                T* temp = &data_;
+                delete temp;
                 return true;
             }
             return false;
         }
 
         //!  Contem
-        bool contains(const X& data_) const {
-            if (data == data_) {
+        bool contain(T& data) {
+            if (data_ == data) {
                 return true;
             }
             return false;
@@ -98,109 +101,106 @@ class BinaryTree {
         }
 
         //!  Ordena
-        void pre_order(ArrayList<X>& v) const {
+        void pre_order(ArrayList<T>& v) const {
             true;
         }
 
         //!  Ordena
-        void in_order(ArrayList<X>& v) const {
+        void in_order(ArrayList<T>& v) const {
             true;
         }
 
         //!  Ordena
-        void post_order(ArrayList<X>& v) const {
+        void post_order(ArrayList<T>& v) const {
             true;
         }
 
         Node* left() {  // getter: próximo
-            return left;
+            return left_;
         }
         const Node* left() const {  // getter const: próximo
-            return left;
+            return left_;
         }
         void left(Node* node) {  // setter: próximo
-            left = node;
+            left_ = node;
         }
 
         Node* right() {  // getter: anterior
-            return right;
+            return right_;
         }
         const Node* right() const {  // getter: anterior
-            return right;
+            return right_;
         }
         void right(Node* node) {  // setter: anterior
-            right = node;
+            right_ = node;
         }
-        X& data() {
-            return data;
-        }
-        const X& data() const {
-            return data;
+        T& data() {
+            return data_;
         }
 
          private:
-        X data;
-        Node* left{nullptr};
-        Node* right{nullptr};
+        T data_;
+        Node* left_{nullptr};
+        Node* right_{nullptr};
     };
 
     //! Contem
-    bool contains(Node* leaf, X& data) const {
+    bool contain_(T& data, Node* leaf) {
         if (leaf != nullptr) {
-            if (leaf->contains(data)) {
+            if (leaf->contain(data)) {
                 return true;
-            } else if (leaf->data < data) {
-                contains(leaf->left(), data);
+            } else if (leaf->data() < data) {
+                return contain_(data, leaf->left());
             } else {
-                contains(leaf->right(), data);
+                return contain_(data, leaf->right());
             }
         }
         return false;
     }
     //! Procura Nodo
-    Node* search(Node* leaf, X& data) {
+    Node* search(T& data, Node* leaf) {
         if (leaf != nullptr) {
-            if (leaf->contains(data)) {
+            if (leaf->contain(data)) {
                 return leaf;
-            } else if (leaf->left()->contains(data)) {
+            } else if (leaf->left()->contain(data)) {
                 return leaf->left();
-            } else if (leaf->right()->contains(data)) {
+            } else if (leaf->right()->contain(data)) {
                 return leaf->right();
             } else if (leaf->data() < data) {
-                search(leaf->left(), data);
+                search(data, leaf->left());
             } else {
-                search(leaf->right(), data);
+                search(data, leaf->right());
             }
         }
         return nullptr;
     }
 
     //! Insert Recursivo
-    void insert(X& data, Node* leaf) {
+    void inserter(T data, Node* leaf) {
         if (leaf == nullptr) {
             leaf = new Node(data);
-        } else if (data <= leaf->data) {
+        } else if (data <= leaf->data()) {
             if (leaf->left() == nullptr) {
                 leaf->left(new Node(data));
             } else {
-                insert(data, leaf->left());
+                inserter(data, leaf->left());
             }
         } else {
             if (leaf->right() == nullptr) {
                 leaf->right(new Node(data));
             } else {
-                insert(data, leaf->right());
+                inserter(data, leaf->right());
             }
         }
     }
     //! Remoção Recursiva
-    void removes(const X& data, Node* node) {
-        if (contains(node, data)) {
-            Node* leaf = search(node, data);
-            leaf->remove(data);
-            if (leaf -> right() != nullptr & leaf -> left() != nullptr) {
+    void removes(T& data, Node* node) {
+        if (contain_(data, node)) {
+            Node* leaf = search(data, node);
+            leaf->remover(data);
+            if (leaf -> right() != nullptr && leaf -> left() != nullptr) {
                 Node* temp = leaf->right()->minimum();
-                leaf->insert(temp->data);
+                leaf->data(temp->data());
                 removes(temp->data(), temp);
             } else if (leaf -> right() != nullptr) {
                 Node* temp = leaf -> right();
@@ -227,7 +227,7 @@ class BinaryTree {
         }
     }
 
-    Node* root;
+    Node* root_;
     std::size_t size_;
 };
 
