@@ -2,7 +2,7 @@
  * main.cpp
  *
  *  Created on: 29 de abr de 2017
- *      Author: vinicius
+ *      Author: vinicius e thiago
  */
 #include <iostream>
 #include <unistd.h>
