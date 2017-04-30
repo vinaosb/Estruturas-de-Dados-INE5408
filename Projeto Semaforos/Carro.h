@@ -2,7 +2,7 @@
  * Carro.h
  *
  *  Created on: 28 de abr de 2017
- *      Author: vinicius
+ *      Author: vinicius e thiago
  */
 
 #ifndef CARRO_H_
