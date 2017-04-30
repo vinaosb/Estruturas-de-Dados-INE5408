@@ -2,7 +2,7 @@
  * Node.h
  *
  *  Created on: 29 de abr de 2017
- *      Author: vinicius
+ *      Author: vinicius e thiago
  */
 
 #ifndef NODE_H_
