@@ -2,7 +2,7 @@
  * Via.cpp
  *
  *  Created on: 28 de abr de 2017
- *      Author: vinicius e thiago
+ *      Author: vinicius
  */
 
 #include "Lane.h"
@@ -55,7 +55,7 @@ void Lane::enqueue(Carro *data, int time) {
 		tail->setNext(new Node(data, nullptr));
 		tail = tail->getNext();
 	} else {
-		throw(std::out_of_range("A pista esta cheia."));
+		throw(out_of_range("A pista esta cheia."));
 	}
 	carsentered_++;
 	current += data->Size();
@@ -63,10 +63,11 @@ void Lane::enqueue(Carro *data, int time) {
 }
 Carro* Lane::dequeue(int time) {
 	Carro* back;
+	back = nullptr;
 	if (empty()) {
-		throw(std::out_of_range("A fila está vazia."));
+		throw(out_of_range("A fila está vazia."));
 	}
-	if ((head->getData()->timeEntry() + (sizelimit_ / speed_)) > time) {
+	if (((head->getData()->timeEntry()/1000) + (sizelimit_ / speed_)) > time/1000) {
 		Node *n = head;
 		back = n->getData();
 		head = head->getNext();
@@ -79,20 +80,20 @@ Carro* Lane::dequeue(int time) {
 }
 Carro* Lane::front() const {
 	if (empty()) {
-		throw(std::out_of_range("A fila está vazia."));
+		throw(out_of_range("A fila está vazia."));
 	}
 	return head->getData();
 }
 Carro* Lane::back() const {
 	if (empty()) {
-		throw(std::out_of_range("A fila está vazia."));
+		throw(out_of_range("A fila está vazia."));
 	}
 	return tail->getData();
 }
 bool Lane::empty() const {
 	return !size_;
 }
-std::size_t Lane::size() const {
+size_t Lane::size() const {
 	return size_;
 }
 int Lane::carsEntered(){

@@ -2,7 +2,7 @@
  * Node.cpp
  *
  *  Created on: 29 de abr de 2017
- *      Author: vinicius e thiago
+ *      Author: vinicius
  */
 
 #include "Node.h"

@@ -1,153 +1,106 @@
 /*
- * Via.cpp
+ * Via.h
  *
  *  Created on: 28 de abr de 2017
  *      Author: vinicius
  */
 
-#include "Lane.h"
+#ifndef LANE_H_
+#define LANE_H_
+
+#include "Carro.h"
+#include "Node.h"
+#include <cstddef>
+#include <stdexcept>
 
 namespace std {
-Lane::Lane() {
-	speed_ = -1;
-	sizelimit_ = -1;
-	lane_ = -1;
-}
-Lane::Lane(int vel, int lane, int lanesize) {
-	speed_ = vel;
-	sizelimit_ = lanesize;
-	lane_ = lane;
-}
+/**
+ * enumerador de Pistas para facilitar interpretação
+ */
+enum LANE : int {N1S,S1N,L1O,O1L,C1O,N1N,S1S,L1L,O1O,C1L,N2S,S2N,N2N,S2S};
+/**
+ * enumerador de chances para facilitar leitura de codigo
+ */
+enum LaneChangeChance : int {oitenta10 = 8, dez80 = 9, quarenta30 = 40, trinta40 = 30};
+/**
+ * Classe Pista
+ */
+class Lane {
+public:
+	/**
+	 * Construtor default de pista
+	 */
+	Lane();
+	/**
+	 * Construtor de pista
+	 * @param vel define a velocidade da pista
+	 * @param lane define qual o valor da pista pelo enumerador
+	 * @param lanesize define o tamanho da pista
+	 */
+	Lane(int vel, int lane, int lanesize);
+	virtual ~Lane();
+	/**
+	 * Funcao que limpa os carros da pista
+	 */
+	void clear();
+	/**
+	 * Funcao para criar um carro e alocar o mesmo na pista
+	 * @param time parametro de tempo
+	 */
+	void enqueue(int time);
+	/**
+	 * Funcao para alocar um carro na pista e setar seu tempo de entrada
+	 * @param data recebe o carro para ser alocado
+	 * @param time recebe o tempo atual
+	 */
+	void enqueue(Carro* data, int time);
+	/**
+	 * Funcao para desalocar o carro caso o tempo esteja correto
+	 * @param time tempo atual
+	 * @return retorna um carro ou um nullptr
+	 */
+	Carro* dequeue(int time);
+	/**
+	 * retorna o carro que esta na frente dos outros
+	 * @return retorna o carro na frente
+	 */
+	Carro* front() const;
+	/**
+	 * retorna o carro atras dos outros
+	 * @return retorna o carro atras
+	 */
+	Carro* back() const;
+	/**
+	 * confere se a lista está vazia
+	 * @return verdadeiro se tiver vazio, falso caso nao esteja
+	 */
+	bool empty() const;
+	/**
+	 * retorna o tamanho da pista
+	 * @return tamanho da pista
+	 */
+	size_t size() const;
+	/**
+	 * retorna quantos carros entraram na pista
+	 * @return numero de carros que entraram
+	 */
+	int carsEntered();
+	/**
+	 * retorna o numero de carros que sairam da pista
+	 * @return numero de carros que sairam
+	 */
+	int carsExited();
+private:
+	Carro* carGenerate(int time);
+	LANE turnGeneration(int i);
 
-Lane::~Lane() {
-	clear();
-}
-void Lane::clear() {
-	Node *previous = head;
-	while (previous != nullptr) {
-		previous = previous->getNext();
-		dequeue(0);
-	}
-	head = nullptr;
-	tail = nullptr;
-	size_ = 0;
-}  // limpar
-void Lane::enqueue(int time) {
-	Carro* data = carGenerate(time);
-	if (empty()) {
-		head = new Node(data, nullptr);
-		tail = head;
-	} else {
-		tail->setNext(new Node(data, nullptr));
-		tail = tail->getNext();
-	}
-	carsentered_++;
-	current += data->Size();
-	data->timeEntry(time);
-	size_++;
-}
-void Lane::enqueue(Carro *data, int time) {
-	data->timeEntry(time);
-	if (empty()) {
-		head = new Node(data, nullptr);
-		tail = head;
-	} else if (current + data->Size() <= sizelimit_) {
-		tail->setNext(new Node(data, nullptr));
-		tail = tail->getNext();
-	} else {
-		throw(std::out_of_range("A pista esta cheia."));
-	}
-	carsentered_++;
-	current += data->Size();
-	size_++;
-}
-Carro* Lane::dequeue(int time) {
-	Carro* back;
-	if (empty()) {
-		throw(std::out_of_range("A fila está vazia."));
-	}
-	if (((head->getData()->timeEntry()/1000) + (sizelimit_ / speed_)) > time/1000) {
-		Node *n = head;
-		back = n->getData();
-		head = head->getNext();
-		delete n;
-		carsexited_++;
-		size_--;
-		current -= back->Size();
-	}
-	return back;
-}
-Carro* Lane::front() const {
-	if (empty()) {
-		throw(std::out_of_range("A fila está vazia."));
-	}
-	return head->getData();
-}
-Carro* Lane::back() const {
-	if (empty()) {
-		throw(std::out_of_range("A fila está vazia."));
-	}
-	return tail->getData();
-}
-bool Lane::empty() const {
-	return !size_;
-}
-std::size_t Lane::size() const {
-	return size_;
-}
-int Lane::carsEntered(){
-	return carsentered_;
-}
-int Lane::carsExited(){
-	return carsexited_;
-}
-Carro* Lane::carGenerate(int time) {
-	return new Carro(
-			turnGeneration(1),
-			turnGeneration(2),
-			time);
-}
-
-LANE Lane::turnGeneration(int i){
-	LANE s1,s2;
-	int temp = rand()%10, temp2 = rand()%10;
-	//atribui s1 para as fontes da esquerda
-	if(lane_ == O1L || lane_ == N1S || lane_ == S1N){
-		if(temp < oitenta10){s1 = C1L;}
-		else if(temp < dez80){
-			if (lane_ == O1L) {s1 = N1N;}
-			else {s1 = O1O;}
-		} else {
-			if(lane_ == O1L || lane_ == N1S){s1 = S1S;}
-			else {s1 = N1N;}
-		}
-		//atribui s2 para as fontes da esquerda
-		if(temp2 < quarenta30) {s2 = L1L;}
-		else if (temp2 < trinta40) {s2 = N2N;}
-		else {s2 = S2S; }
-	//atribui s2 para as fontes da direita
-	} else {
-		if(temp < quarenta30) {
-			if (lane_ == L1O)
-				s2 = N2N;
-			else
-				s2 = L1L;
-		}
-		else if(temp < trinta40){
-			if (lane_ == S2N) {s2 = N2N;}
-			else {s2 = N2S;}
-		} else {
-			s2 = C1O;
-		}
-		//atribui s1 para as fontes da direita
-		if(temp2 < quarenta30) {s1 = O1O;}
-		else if (temp2 < trinta40) {s1 = N1N;}
-		else {s1 = S1S; }
-	}
-	if (i == 1)
-		return s1;
-	else
-		return s2;
-}
+	Node* head = NULL;  // nodo-cabeça
+	Node* tail = NULL;  // nodo-fim
+	size_t size_ { 0u };  // tamanho
+	int current { 0 };  // atual
+	int speed_, sizelimit_, lane_,carsentered_{0},carsexited_{0};
+};
 
 } /* namespace via */
+
+#endif /* LANE_H_ */

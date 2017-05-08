@@ -2,7 +2,7 @@
  * main.cpp
  *
  *  Created on: 29 de abr de 2017
- *      Author: vinicius e thiago
+ *      Author: vinicius
  */
 #include <iostream>
 #include <unistd.h>
@@ -14,6 +14,7 @@
 
 namespace std {
 
+
 void showhelpinfo(char *s);
 Lane** LaneGenerator(Lane** laness_);
 void parserChecker(int argc, char* argv[]);
@@ -24,7 +25,7 @@ void carsCounter(Lane** lanes);
 
 
 int simulationTimeMiliseconds = 3600000, semaphoreTimeMiliseconds = 30000;
-std::vector<int> counterCars(30,0); // 14 e 15 entrada/saida global, 0-13 entrada, 16-29 saidas
+vector<int> counterCars(30, 0); // 14 e 15 entrada/saida global, 0-13 entrada, 16-29 saidas
 
 enum LaneType {
 	Creater = 0, Disposer = 1
@@ -41,18 +42,22 @@ int main(int argc, char* argv[]) {
 	parserChecker(argc, argv);
 	Semaforo* sem =new Semaforo(semaphoreTimeMiliseconds);
 	Lane** lanes = LaneGenerator(laness_);
-	for (int clock = 0; clock < simulationTimeMiliseconds; clock++){
-		createCars(clock,lanes);
-		semaphoreMover(clock,lanes,sem);
-		carsRemover(clock,lanes);
+	try{
+		for (int clock = 0; clock < simulationTimeMiliseconds; clock++){
+			createCars(clock,lanes);
+			semaphoreMover(clock,lanes,sem);
+			carsRemover(clock,lanes);
+		}
+		carsCounter(lanes);
+		for(int i = 0; i < 14; i++){
+			cout<<counterCars[i]<<" carros entraram na pista "<< static_cast<LANE>(i) << endl;
+			cout<<counterCars[i+16]<<" carros sairam da pista "<< static_cast<LANE>(i) << endl;
+		}
+		cout<<counterCars[14]<<" carros entraram no sistema " << endl;
+		cout<<counterCars[15]<<" carros sairam do sistema " << endl;
+	} catch (const char* e){
+		cout << e << endl;
 	}
-	carsCounter(lanes);
-	for(int i = 0; i < 14; i++){
-		cout<<counterCars[i]<<" carros entraram na pista "<< static_cast<LANE>(i) << endl;
-		cout<<counterCars[i+16]<<" carros sairam da pista "<< static_cast<LANE>(i) << endl;
-	}
-	cout<<counterCars[14]<<" carros entraram no sistema " << endl;
-	cout<<counterCars[15]<<" carros sairam do sistema " << endl;
 
 	return 0;
 }
