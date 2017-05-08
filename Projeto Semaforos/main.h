@@ -2,7 +2,7 @@
  * main.h
  *
  *  Created on: 8 de mai de 2017
- *      Author: vinicius
+ *      Author: Vinícius Schwinden Berkenbrock e Thiago Martendal Salvador
  */
 
 #ifndef MAIN_H_
