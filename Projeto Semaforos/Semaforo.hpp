@@ -11,7 +11,10 @@
 namespace std {
 
 enum viasAberta : int {
-	norte = 0, sul = 1, leste = 2, oeste = 3
+	norte = 0, /**<Abre a via Norte com direção Sul (1 e 2)*/
+	sul = 1, /**<Abre a via Sul com direção Norte (1 e 2)*/
+	leste = 2, /**<Abre a via Leste e Central com direção Oeste (1 e 2)*/
+	oeste = 3 /**<Abre a via Oeste e Central com direção Leste (1 e 2)*/
 };
 /**
  * Classe Semaforo

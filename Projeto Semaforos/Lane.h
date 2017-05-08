@@ -15,22 +15,36 @@
 
 namespace std {
 /**
- * enumerador de Pistas para facilitar interpretação
+ * enumerador de Pistas para facilitar interpretação das mesmas
  */
-enum LANE : int {N1S,S1N,L1O,O1L,C1O,N1N,S1S,L1L,O1O,C1L,N2S,S2N,N2N,S2S};
+enum LANE : int {N1S, /**<Pista Norte 1 Direção Sul*/
+	S1N, /**<Pista Sul 1 Direção Norte*/
+	L1O, /**<Pista Leste 1 Direção Oeste*/
+	O1L, /**<Pista Oeste 1 Direção Leste*/
+	C1O, /**<Pista Central 1 Direção Oeste*/
+	N1N, /**<Pista Norte 1 Direção Norte*/
+	S1S, /**<Pista Sul 1 Direção Sul*/
+	L1L, /**<Pista Leste 1 Direção Leste*/
+	O1O, /**<Pista Oeste 1 Direção Oeste*/
+	C1L, /**<Pista Central 1 Direção Leste*/
+	N2S, /**<Pista Norte 2 Direção Sul*/
+	S2N, /**<Pista Sul 2 Direção Norte*/
+	N2N, /**<Pista Norte 2 Direção Norte*/
+	S2S /**<Pista Sul 2 Direção Sul*/
+};
 /**
  * enumerador de chances para facilitar leitura de codigo
  */
-enum LaneChangeChance : int {oitenta10 = 8, dez80 = 9, quarenta30 = 40, trinta40 = 30};
+enum LaneChangeChance : int {oitenta10 = 8, /**<Oitenta Porcento*/
+	dez80 = 9, /**<Dez Porcento*/
+	quarenta30 = 7, /**<Quarenta Porcento*/
+	trinta40 = 3 /**<Trinta Porcento*/
+};
 /**
  * Classe Pista
  */
 class Lane {
 public:
-	/**
-	 * Construtor default de pista
-	 */
-	Lane();
 	/**
 	 * Construtor de pista
 	 * @param vel define a velocidade da pista
@@ -65,11 +79,6 @@ public:
 	 * @return retorna o carro na frente
 	 */
 	Carro* front() const;
-	/**
-	 * retorna o carro atras dos outros
-	 * @return retorna o carro atras
-	 */
-	Carro* back() const;
 	/**
 	 * confere se a lista está vazia
 	 * @return verdadeiro se tiver vazio, falso caso nao esteja
