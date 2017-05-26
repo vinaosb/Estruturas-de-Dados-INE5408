@@ -1,235 +1,209 @@
-//! Copyright [2017] <Vinicius Schwinden Berkenbrock>
+//! Copyright Vinicius Schwinden Berkenbrock 2017
+
 #ifndef BINARY_TREE_H
 #define BINARY_TREE_H
 
-#include <cstdint>
-#include <stdexcept>      // C++ exceptions
-#include "array_list.h"
+#include "./array_list.h"
 
 namespace structures {
 
-template<typename T>
+//! Classe BinaryTree
+/*! A classe BinaryTree é uma árvore binéria com busca de percursos. */
 
-//! Arvore Binaria
+template<typename T>
 class BinaryTree {
  public:
-    //! Construtor
-    BinaryTree() {
-        root_ = nullptr;
-        size_ = 0;
-    }
-    //! Destrutor
-    ~BinaryTree() {
-        destroy(root_);
-        size_ = 0;
-        root_ = nullptr;
+    BinaryTree() = default;
+
+    virtual ~BinaryTree() {
+        delete root;
+        size_ = 0u;
     }
 
-    //! Insersor
-    void insert(T data) {
-        inserter(data, root_);
+    //! Método insert
+    /*! O método insert insere um dado na árvore. */
+    void insert(const T& data) {
+        if (empty()) {
+            root = new Node(data);
+        } else {
+            root->insert(data);
+        }
         size_++;
     }
-    //! Remoção
-    void remove(T data) {
-        if (contains(data)) {
-            removes(data, root_);
+
+    //! Método remove
+    /*! O método remove excluiu um dado da árvore. */
+    void remove(const T& data) {
+        if (!empty()) {
             size_--;
+            root->remove(data);
         }
     }
 
-    //! Contem
-    bool contains(T data) {
-        return contain_(data, root_);
+    //! Método contains
+    /*! O método contains verifica se um dadp existe na árvore. */
+    bool contains(const T& data) const {
+        if (!empty()) {
+            return root->contains(data);
+        }
+        return false;
     }
-    //! Vazio
+
+    //! Método empty
+    /*! O método empty verifica se a árvore está vazia. */
     bool empty() const {
         return !size();
     }
 
-    //! Tamanho
+    //! Método size
+    /*! O método size retorna o tamanho da árvore. */
     std::size_t size() const {
         return size_;
     }
-    //! Ordenacao
+
+    //! Método pre_order
+    /*! O método pre_order adiciona o dado antes de ordenar a árvore. */
     ArrayList<T> pre_order() const {
-            return new ArrayList();
+        structures::ArrayList<T> v{};
+        if (!empty()) {
+            root->pre_order(v);
         }
-    //! Ordenacao
+        return v;
+    }
+
+    //! Método in_order
+    /*! O método in_order adiciona o dado durante a ordenação da árvore. */
     ArrayList<T> in_order() const {
-            return new ArrayList();
+        structures::ArrayList<T> v{};
+        if (!empty()) {
+            root->in_order(v);
         }
-    //! Ordenacao
+        return v;
+    }
+
+    //! Método post_order
+    /*! O método post_order adiciona o dado depois de ordenar a árvore. */
     ArrayList<T> post_order() const {
-            return new ArrayList();
+        structures::ArrayList<T> v{};
+        if (!empty()) {
+            root->post_order(v);
         }
+        return v;
+    }
 
  private:
     struct Node {
-         public:
-        explicit Node(T& data):
-            data_{data}
+        explicit Node(const T& data) : data{data}, left{nullptr}, right{nullptr}
         {}
 
+        T data;
+        Node* left;
+        Node* right;
 
-        void data(T& data) {
-            data_ = data;
+        void insert(const T& data_) {
+            Node *n;
+            if (data_ < this->data) {
+                if (this->left == nullptr) {
+                    n = new Node(data_);
+                    n->left = nullptr;
+                    n->right = nullptr;
+                    this->left = n;
+                } else {
+                    left->insert(data_);
+                }
+            } else {
+                if (this->right == nullptr) {
+                    n = new Node(data_);
+                    n->left = nullptr;
+                    n->right = nullptr;
+                    this->right = n;
+                } else {
+                    right->insert(data_);
+                }
+            }
         }
 
-        bool remover(T& data) {
-            if (contain(data)) {
-                T* temp = &data_;
-                delete temp;
-                return true;
+        bool remove(const T& data_) {
+            if (data_ == this->data) {
+                if ((this->left != nullptr) && (this->right != nullptr)) {
+                    Node *n = this->right;
+                    while (n->left != nullptr) {
+                        n = n->left;
+                    }
+                    this->data = n->data;
+                    return right->remove(this->data);
+                } else {
+                    if (this->right != nullptr) {
+                        this->data = right->data;
+                        return right->remove(this->data);
+                    } else {
+                        if (this->left != nullptr) {
+                            this->data = left->data;
+                            return left->remove(this->data);
+                        } else {
+                            delete this;
+                            return true;
+                        }
+                    }
+                }
+            } else {
+                if (this->right != nullptr && this->data < data_) {
+                    return right->remove(data_);
+                } else if (this->left != nullptr && this->data > data_) {
+                    return left->remove(data_);
+                }
             }
             return false;
         }
 
-        //!  Contem
-        bool contain(T& data) {
-            if (data_ == data) {
+        bool contains(const T& data_) const {
+            if (data_ == this->data) {
                 return true;
+            } else {
+                if ((this->left != nullptr) && (data_ < this->data)) {
+                    return left->contains(data_);
+                } else if ((this->right != nullptr) && (data_ > this->data)) {
+                    return right->contains(data_);
+                }
             }
             return false;
         }
 
-        //!  Acha o menor nodo
-        Node* minimum() {
-            if (this->left())
-                return this->left()->minimum();
-            return this;
-        }
-
-        //!  Ordena
         void pre_order(ArrayList<T>& v) const {
-            true;
+            v.push_back(this->data);
+            if (this->left != nullptr) {
+                left->pre_order(v);
+            }
+            if (this->right != nullptr) {
+                right->pre_order(v);
+            }
         }
 
-        //!  Ordena
         void in_order(ArrayList<T>& v) const {
-            true;
+            if (this->left != nullptr) {
+                left->in_order(v);
+            }
+            v.push_back(this->data);
+            if (this->right != nullptr) {
+                right->in_order(v);
+            }
         }
 
-        //!  Ordena
         void post_order(ArrayList<T>& v) const {
-            true;
+            if (this->left != nullptr) {
+                left->post_order(v);
+            }
+            if (this->right != nullptr) {
+                right->post_order(v);
+            }
+            v.push_back(this->data);
         }
-
-        Node* left() {  // getter: próximo
-            return left_;
-        }
-        const Node* left() const {  // getter const: próximo
-            return left_;
-        }
-        void left(Node* node) {  // setter: próximo
-            left_ = node;
-        }
-
-        Node* right() {  // getter: anterior
-            return right_;
-        }
-        const Node* right() const {  // getter: anterior
-            return right_;
-        }
-        void right(Node* node) {  // setter: anterior
-            right_ = node;
-        }
-        T& data() {
-            return data_;
-        }
-
-         private:
-        T data_;
-        Node* left_{nullptr};
-        Node* right_{nullptr};
     };
 
-    //! Contem
-    bool contain_(T& data, Node* leaf) {
-        if (leaf != nullptr) {
-            if (leaf->contain(data)) {
-                return true;
-            } else if (leaf->data() < data) {
-                return contain_(data, leaf->left());
-            } else {
-                return contain_(data, leaf->right());
-            }
-        }
-        return false;
-    }
-    //! Procura Nodo
-    Node* search(T& data, Node* leaf) {
-        if (leaf != nullptr) {
-            if (leaf->contain(data)) {
-                return leaf;
-            } else if (leaf->left()->contain(data)) {
-                return leaf->left();
-            } else if (leaf->right()->contain(data)) {
-                return leaf->right();
-            } else if (leaf->data() < data) {
-                search(data, leaf->left());
-            } else {
-                search(data, leaf->right());
-            }
-        }
-        return nullptr;
-    }
-
-    //! Insert Recursivo
-    void inserter(T data, Node* leaf) {
-        if (leaf == nullptr) {
-            leaf = new Node(data);
-        } else if (data <= leaf->data()) {
-            if (leaf->left() == nullptr) {
-                leaf->left(new Node(data));
-            } else {
-                inserter(data, leaf->left());
-            }
-        } else {
-            if (leaf->right() == nullptr) {
-                leaf->right(new Node(data));
-            } else {
-                inserter(data, leaf->right());
-            }
-        }
-    }
-    //! Remoção Recursiva
-    void removes(T& data, Node* node) {
-        if (contain_(data, node)) {
-            Node* leaf = search(data, node);
-            leaf->remover(data);
-            if (leaf -> right() != nullptr && leaf -> left() != nullptr) {
-                Node* temp = leaf->right()->minimum();
-                leaf->data(temp->data());
-                removes(temp->data(), temp);
-            } else if (leaf -> right() != nullptr) {
-                Node* temp = leaf -> right();
-                leaf->left(temp -> left());
-                leaf->right(temp ->right());
-                delete temp;
-            } else if (leaf -> left() != nullptr) {
-                Node* temp = leaf -> left();
-                leaf->left(temp -> left());
-                leaf->right(temp ->right());
-                delete temp;
-            } else {
-                delete leaf;
-            }
-        }
-    }
-
-    //! Funcao Recursiva Destruir
-    void destroy(Node* leaf) {
-        if (leaf != nullptr) {
-            destroy(leaf->left());
-            destroy(leaf->right());
-            delete leaf;
-        }
-    }
-
-    Node* root_;
-    std::size_t size_;
+    Node* root{nullptr};
+    std::size_t size_{0u};
 };
 
-}  //  namespace structures
+}  // namespace structures
+
 #endif
