@@ -1,0 +1,169 @@
+/*
+ * main.c
+ *
+ *  Created on: 26 de mai de 2017
+ *      Author: vinicius
+ */
+#include <iostream>
+#include <fstream>
+#include <thread>
+#include <set>
+#include <map>
+
+const char* indexSecundario = "indexSecundario", *indexPrimario = "indexPrimario.dat";
+
+void loadPrimario (int argc, char** argv, std::set<char*> chavesPrimarias) {
+	chavesPrimarias.clear();
+	for(int i = 1; i < argc; i++) {
+		chavesPrimarias.insert(argv[i]);
+	}
+}
+void loadSecundarios (int argc, char** argv, std::multimap<char*,char*> chavesSecundarias) {
+	std::ifstream ifs;
+	chavesSecundarias.clear();
+	char* temp = NULL;
+	for (int i = 1; i < argc; i++) {
+		ifs.open(argv[i], std::ifstream::in);
+		while (ifs.good()) {
+			ifs.getline(temp, 256, ' ');
+			chavesSecundarias.insert(std::pair<char*,char*> (temp, argv[i]));
+		}
+		ifs.close();
+	}
+}
+void threadCriadora(int argc, char** argv, std::set<char*> chavesPrimarias, std::multimap<char*,char*> chavesSecundarias) {
+	std::thread primario(loadPrimario, argc, argv, chavesPrimarias);
+	std::thread secundario(loadSecundarios, argc, argv, chavesSecundarias);
+	primario.join();
+	secundario.join();
+}
+
+void criaArquivoPrimario (std::set<char*> chavesPrimarias) {
+	std::ofstream ofs;
+	for (std::set<char*>::iterator it = chavesPrimarias.begin(); it != chavesPrimarias.end(); ++it) {
+		ofs.open(indexPrimario, std::ofstream::out);
+		ofs.write(*it, 256);
+		ofs.close();
+	}
+}
+void criaArquivoSecundario (std::multimap<char*,char*> chavesSecundarias) {
+	std::ofstream ofs;
+	char* temp;
+	std::string temp2;
+	std::set<char*> indexes;
+	for (std::multimap<char*,char*>::iterator it = chavesSecundarias.begin(); it != chavesSecundarias.end(); ++it) {
+		temp2 = std::string(indexSecundario);
+		temp2 += (*it).second;
+		temp2.copy(temp, 256);
+		indexes.insert(temp);
+		ofs.open(temp, std::ofstream::out);
+		ofs.write((*it).first, 256);
+		ofs.close();
+	}
+	temp2 = std::string(indexSecundario);
+	temp2 += ".dat";
+	temp2.copy(temp, 256);
+	std::ofstream ofsIndex = std::ofstream(temp, std::ofstream::out);
+	for (std::set<char*>::iterator it = indexes.begin(); it != indexes.end(); ++it) {
+		ofsIndex.write(*it,256);
+	}
+	ofsIndex.close();
+}
+void salvaIndexadores (std::set<char*> chavesPrimarias, std::multimap<char*,char*> chavesSecundarias) {
+	std::thread t1(criaArquivoPrimario, chavesPrimarias);
+	std::thread t2(criaArquivoSecundario, chavesSecundarias);
+	t1.join();
+	t2.join();
+}
+
+void carregaPrimario (std::set<char*> chavesPrimarias) {
+	std::ifstream ifs(indexPrimario, std::ifstream::in);
+	chavesPrimarias.clear();
+	char* temp;
+	while (ifs.good()) {
+		ifs.getline(temp, 256, ' ');
+		chavesPrimarias.insert(temp);
+	}
+	ifs.close();
+}
+void carregaSecundario (std::multimap<char*,char*> chavesSecundarias) {
+	char* temp, *temp3;
+	std::string temp2;
+	temp2 = std::string(indexSecundario);
+	temp2 += ".dat";
+	temp2.copy(temp, 256);
+	std::ifstream ifs(temp, std::ifstream::in);
+	chavesSecundarias.clear();
+	while (ifs.good()) {
+		temp2.clear();
+
+		ifs.getline(temp3, 256, ' ');
+		temp2 = std::string(indexSecundario);
+		temp2 += temp3;
+		temp2.copy(temp, 256);
+		std::ifstream ifs2(temp);
+		while(ifs2.good()) {
+			ifs2.getline(temp,256,' ');
+			chavesSecundarias.insert(temp,temp3);
+		}
+		ifs2.close();
+	}
+	ifs.close();
+}
+void carregaIndexes (std::set<char*> chavesPrimarias, std::multimap<char*,char*> chavesSecundarias) {
+	std::thread t1(carregaPrimario, chavesPrimarias);
+	std::thread t2(carregaSecundario, chavesSecundarias);
+	t1.join();
+	t2.join();
+}
+
+void procuraChavePrimaria(std::set<char*> chavesPrimarias, char* chave) {
+	std::set<char*>::iterator it = chavesPrimarias.find(chave);
+	if(it != chavesPrimarias.end()) {
+		std::cout << "Achou chave Primaria" << '\n';
+	} else {
+		std::cout << "Nao achou chave Primaria" << '\n';
+	}
+}
+void procuraChaveSecundaria(std::multimap<char*,char*> chavesSecundarias, std::set<char*> indexSelecionado, char* chave) {
+	std::multimap::iterator it2 = chavesSecundarias.find(chave);
+	while (it2 != chavesSecundarias.end()) {
+		indexSelecionado.insert(it2.second);
+	}
+}
+void procuraAmbasChaves(std::set<char*> chavesPrimarias, std::set<char*> chavesConjuntivas, std::multimap<char*,char*> chavesSecundarias, char* chave1, char* chave2) {
+	std::thread t1(procuraChavePrimaria, chavesPrimarias, chave1);
+	t1.join();
+	std::thread t2(procuraChaveSecundaria, chavesSecundarias, chavesConjuntivas, chave2);
+	t2.join();
+	std::thread t3(procuraChavePrimaria, chavesConjuntivas, chave2);
+	t3.join();
+}
+
+int main(int argc, char** argv)
+{
+	// nomes dos arquivos
+	std::set<char*> chavesPrimarias;
+	std::set<char*> chavesConjuntivas;
+
+	// string a procurar, nome do arquivo
+	std::multimap<char*,char*> chavesSecundarias;
+
+	std::thread criadora(threadCriadora, argc, argv, chavesPrimarias, chavesSecundarias);
+	criadora.join();
+	std::thread salva(salvaIndexadores, chavesPrimarias, chavesSecundarias);
+	criadora.join();
+
+	chavesPrimarias.clear();
+	chavesSecundarias.clear();
+
+	std::thread carregador(carregaIndexes, chavesPrimarias, chavesSecundarias);
+	carregador.join();
+
+	std::thread procura(procuraAmbasChaves, chavesPrimarias, chavesConjuntivas, chavesSecundarias, "abc", "123");
+
+
+	return 0;
+}
+
+
