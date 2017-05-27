@@ -140,6 +140,13 @@ void procuraAmbasChaves(std::set<char*> chavesPrimarias, std::set<char*> chavesC
 	t3.join();
 }
 
+void deletaChavePrimaria(std::set<char*> chavesPrimarias, char* chave) {
+	chavesPrimarias.erase(chave);
+}
+void deletaChaveSecundaria(std::multimap<char*,char*> chavesSecundarias, char* chave) {
+	chavesSecundarias.erase(chave);
+}
+
 int main(int argc, char** argv)
 {
 	// nomes dos arquivos
