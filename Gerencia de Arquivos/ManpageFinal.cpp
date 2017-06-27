@@ -1,5 +1,3 @@
-// Copyright Bruno Marques Do Nascimento e Salomão Rodrigues Jacinto <2016.1>
-
 #include "FileNoAVL.hpp"
 #include "definitions.hpp"
 
